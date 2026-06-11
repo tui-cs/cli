@@ -273,7 +273,7 @@ internal sealed class CommandUiHarness : IAsyncDisposable
             for (var c = 0; c < cols; c++)
             {
                 var g = contents[r, c].Grapheme;
-                hash = unchecked (hash * 31 + (string.IsNullOrEmpty (g) ? 0 : g.GetHashCode ()));
+                hash = unchecked(hash * 31 + (string.IsNullOrEmpty (g) ? 0 : g.GetHashCode ()));
 
                 if (!string.IsNullOrEmpty (g) && g != " ")
                 {

@@ -16,7 +16,7 @@ public static class InputCommandRunner
         CancellationToken cancellationToken,
         Func<TRawResult?, CommandResult<TValue>> resultMapper,
         bool addEnterBinding = true)
-        where TControl : View, new ()
+        where TControl : View, new()
     {
         ArgumentNullException.ThrowIfNull (app);
         ArgumentNullException.ThrowIfNull (wrapper);
@@ -41,7 +41,7 @@ public static class InputCommandRunner
         string defaultTitle,
         CancellationToken cancellationToken,
         bool addEnterBinding = true)
-        where TControl : View, new ()
+        where TControl : View, new()
     {
         return RunAsync<TControl, TValue, TValue> (
             app,

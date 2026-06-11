@@ -257,12 +257,24 @@ public sealed class CliHost
         CancellationToken cancellationToken)
     {
         var useInline = command.Kind == CommandKind.Input && !runOptions.Fullscreen;
+
+        // Application.AppModel is process-wide state; restore it after dispatch so later
+        // Terminal.Gui sessions in the same process (embedding, headless rendering) do not
+        // inherit this command's app model.
+        AppModel previousAppModel = Application.AppModel;
         Application.AppModel = useInline ? AppModel.Inline : AppModel.FullScreen;
 
-        using IApplication app = Application.Create ();
-        app.Init ();
+        try
+        {
+            using IApplication app = Application.Create ();
+            app.Init ();
 
-        return await command.RunAsync (app, runOptions.Initial, runOptions, cancellationToken);
+            return await command.RunAsync (app, runOptions.Initial, runOptions, cancellationToken);
+        }
+        finally
+        {
+            Application.AppModel = previousAppModel;
+        }
     }
 
     private void WriteRootFlag (ArgParser.RootFlag rootFlag, TextWriter stdout)

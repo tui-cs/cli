@@ -28,4 +28,19 @@ The resolver is combined with `CliJsonContext` via `JsonTypeInfoResolver.Combine
 the path reflection-free and AOT-compatible. When `ResultJsonResolver` is null, envelope
 values remain restricted to the built-in value types.
 
+## Default command dispatch
+
+`CliHostOptions.DefaultCommand` (`string?`) names the alias to invoke when args do not
+resolve to a registered command. When set, `CliHost` routes to that command in three cases:
+
+- Args fail to parse (instead of a usage error).
+- Args are empty (which otherwise maps to root `Help`).
+- The leading token is not a recognized command alias.
+
+In each case the host re-parses `[DefaultCommand, ..args]` against the resolved default
+command, so bare positional args and unrecognized options are retried as args to it. If
+`DefaultCommand` names an alias that is not registered, the host emits
+`Default command '<name>' is not registered.` and returns a usage error. When
+`DefaultCommand` is null, the original parse/usage-error behavior is preserved.
+
 `CommandResult` and `CommandResult<T>` intentionally live together in `CommandResult.cs`. `ICliCommand<TValue>` intentionally lives in `ICliCommandGeneric.cs`; do not use angle brackets in filenames.

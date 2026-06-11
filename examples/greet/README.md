@@ -41,11 +41,11 @@ greet --version
 ## Building
 
 ```bash
-dotnet build examples/Terminal.Gui.Cli.Greet/Terminal.Gui.Cli.Greet.csproj
+dotnet build examples/greet/Terminal.Gui.Cli.Greet.csproj
 ```
 
 ## Running
 
 ```bash
-dotnet run --project examples/Terminal.Gui.Cli.Greet -- greet --initial "World"
+dotnet run --project examples/greet -- greet --initial "World"
 ```

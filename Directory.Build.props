@@ -12,13 +12,13 @@
     <Company>gui-cs</Company>
     <Copyright>Copyright (c) gui-cs and contributors</Copyright>
 
-    <Version>0.1.0-develop</Version>
+    <Version>0.2.0-develop</Version>
     <PackageProjectUrl>https://github.com/gui-cs/cli</PackageProjectUrl>
     <RepositoryUrl>https://github.com/gui-cs/cli</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
 
-    <TerminalGuiVersion Condition="'$(TerminalGuiVersion)' == ''">2.4.1-develop.11</TerminalGuiVersion>
+    <TerminalGuiVersion Condition="'$(TerminalGuiVersion)' == ''">2.4.3</TerminalGuiVersion>
 
     <!-- SourceLink & symbol packages -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>

@@ -1,6 +1,4 @@
 using System.Text;
-using Terminal.Gui.App;
-using Terminal.Gui.Drivers;
 using Terminal.Gui.ViewBase;
 using Terminal.Gui.Views;
 
@@ -62,46 +60,41 @@ public static class MarkdownRenderer
             height = 24;
         }
 
-        var previousDriverIO = Environment.GetEnvironmentVariable ("DisableRealDriverIO");
-        Environment.SetEnvironmentVariable ("DisableRealDriverIO", "1");
-        IApplication app = Application.Create ();
-
         try
         {
-            app.Init (DriverRegistry.Names.ANSI);
-            app.Driver?.SetScreenSize (width, height);
-
-            Markdown markdownView = new ()
+            // CliHost owns the Terminal.Gui lifecycle (constitution C1); this helper only
+            // performs view layout and drawing inside the callback.
+            CliHost.RunHeadlessRender (width, height, app =>
             {
-                App = app,
-                UseThemeBackground = false,
-                ShowCopyButtons = false,
-                Width = Dim.Fill (),
-                Height = Dim.Fill (),
-                Text = markdown
-            };
+                Markdown markdownView = new ()
+                {
+                    App = app,
+                    UseThemeBackground = false,
+                    ShowCopyButtons = false,
+                    Width = Dim.Fill (),
+                    Height = Dim.Fill (),
+                    Text = markdown
+                };
 
-            markdownView.SetRelativeLayout (app.Screen.Size);
-            markdownView.Layout ();
+                markdownView.SetRelativeLayout (app.Screen.Size);
+                markdownView.Layout ();
 
-            var contentHeight = markdownView.GetContentHeight ();
-            app.Driver?.SetScreenSize (width, contentHeight);
-            markdownView.SetRelativeLayout (app.Screen.Size);
-            markdownView.Frame = app.Screen with { X = 0, Y = 0 };
-            markdownView.Layout ();
+                var contentHeight = markdownView.GetContentHeight ();
+                app.Driver?.SetScreenSize (width, contentHeight);
+                markdownView.SetRelativeLayout (app.Screen.Size);
+                markdownView.Frame = app.Screen with { X = 0, Y = 0 };
+                markdownView.Layout ();
 
-            app.Driver?.ClearContents ();
-            markdownView.Draw ();
+                app.Driver?.ClearContents ();
+                markdownView.Draw ();
 
-            var rendered = app.Driver?.ToAnsi () ?? string.Empty;
-            rendered = TerminalEscapeSanitizer.SanitizeRenderedOutput (rendered);
-            target.WriteLine (rendered);
+                var rendered = app.Driver?.ToAnsi () ?? string.Empty;
+                rendered = TerminalEscapeSanitizer.SanitizeRenderedOutput (rendered);
+                target.WriteLine (rendered);
+            });
         }
         finally
         {
-            app.Dispose ();
-            Environment.SetEnvironmentVariable ("DisableRealDriverIO", previousDriverIO);
-
             if (previousEncoding is not null)
             {
                 Console.OutputEncoding = previousEncoding;

@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Terminal.Gui.Cli;
 
@@ -27,6 +28,13 @@ public sealed class CliHostOptions
 
     /// <summary>Assembly used to resolve embedded resources. Null falls back to <see cref="Assembly.GetEntryAssembly" />.</summary>
     public Assembly? ResourceAssembly { get; set; }
+
+    /// <summary>
+    ///     Source-generated JSON resolver for command result values written to the <c>--json</c> envelope.
+    ///     It is combined with the library's built-in envelope context so consumer result types serialize
+    ///     without reflection. Null restricts envelope values to the library's built-in value types.
+    /// </summary>
+    public IJsonTypeInfoResolver? ResultJsonResolver { get; set; }
 
     /// <summary>Consumer-defined global options parsed into <see cref="CommandRunOptions.Extensions" />.</summary>
     public List<GlobalOptionDescriptor> GlobalOptions { get; } = [];

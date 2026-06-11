@@ -12,7 +12,7 @@
     <Company>gui-cs</Company>
     <Copyright>Copyright (c) gui-cs and contributors</Copyright>
 
-    <Version>0.1.0-develop</Version>
+    <Version>0.2.0-develop</Version>
     <PackageProjectUrl>https://github.com/gui-cs/cli</PackageProjectUrl>
     <RepositoryUrl>https://github.com/gui-cs/cli</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text;
 using Terminal.Gui.App;
 using Terminal.Gui.Drivers;
 
@@ -50,6 +51,13 @@ public sealed class CliHost
 
         if (initialParse.RootFlag is { } rootFlag)
         {
+            // When a DefaultCommand is set and args are empty (which maps to Help),
+            // run the default command instead of showing help.
+            if (rootFlag == ArgParser.RootFlag.Help && args.Length == 0 && _options.DefaultCommand is not null)
+            {
+                return await RunWithDefaultCommandAsync (args, cancellationToken, stdout, stderr);
+            }
+
             WriteRootFlag (rootFlag, stdout);
             return ExitCodes.Ok;
         }
@@ -148,9 +156,18 @@ public sealed class CliHost
                 return ExitCodes.Cancelled;
             }
 
-            if (catResult is not null)
+            if (catResult is { } cat)
             {
-                return ExitCodes.FromResult (catResult.Value);
+                // RenderCatAsync writes its own rendered output for successful results. For
+                // non-success results it produced no output, so surface the diagnostic (to stderr
+                // in plain text, or the error envelope under --json) instead of exiting silently.
+                if (cat.Status is not (CommandStatus.Ok or CommandStatus.NoResult))
+                {
+                    ResultWriter.Write (cat, runOptions.JsonOutput, stdout, stderr, runOptions.OutputPath,
+                        _options.ResultJsonResolver);
+                }
+
+                return ExitCodes.FromResult (cat);
             }
         }
 
@@ -165,7 +182,25 @@ public sealed class CliHost
             result = CreateCancelledResult ();
         }
 
-        if (!ResultWriter.Write (result, runOptions.JsonOutput, stdout, stderr, runOptions.OutputPath))
+        // Terminal.Gui may change Console.OutputEncoding during its session (e.g. to UTF-8 for
+        // rendering). After shutdown, the encoding might be restored to OEM or left as UTF-8.
+        // Either way, the stdout/stderr references captured before TG ran are now stale
+        // (Console.Out is replaced whenever OutputEncoding changes). Ensure UTF-8 and use
+        // the current Console.Out/Error so Unicode content (box-drawing, etc.) renders correctly.
+        // Only do this when writing to the real console (not custom writers passed by tests).
+        if (stdout is not StringWriter)
+        {
+            if (Console.OutputEncoding.CodePage != Encoding.UTF8.CodePage)
+            {
+                Console.OutputEncoding = Encoding.UTF8;
+            }
+
+            stdout = Console.Out;
+            stderr = Console.Error;
+        }
+
+        if (!ResultWriter.Write (result, runOptions.JsonOutput, stdout, stderr, runOptions.OutputPath,
+                _options.ResultJsonResolver))
         {
             return ExitCodes.UsageError;
         }
@@ -210,14 +245,10 @@ public sealed class CliHost
         CancellationToken cancellationToken)
     {
         var useInline = command.Kind == CommandKind.Input && !runOptions.Fullscreen;
+        Application.AppModel = useInline ? AppModel.Inline : AppModel.FullScreen;
 
         using IApplication app = Application.Create ();
-        app.AppModel = useInline ? AppModel.Inline : AppModel.FullScreen;
-
-        if (!useInline)
-        {
-            app.Init ();
-        }
+        app.Init ();
 
         return await command.RunAsync (app, runOptions.Initial, runOptions, cancellationToken);
     }

@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization.Metadata;
+
 namespace Terminal.Gui.Cli;
 
 /// <summary>Formats command results to stdout, stderr, or an output file.</summary>
@@ -5,12 +7,12 @@ public static class ResultWriter
 {
     /// <summary>Writes <paramref name="result" /> and returns false when output file creation fails.</summary>
     public static bool Write (CommandResult result, bool jsonOutput, TextWriter stdout, TextWriter stderr,
-        string? outputPath = null)
+        string? outputPath = null, IJsonTypeInfoResolver? resultJsonResolver = null)
     {
         ArgumentNullException.ThrowIfNull (stdout);
         ArgumentNullException.ThrowIfNull (stderr);
 
-        var text = jsonOutput ? ToEnvelope (result).ToJson () : ToPlainText (result);
+        var text = jsonOutput ? ToEnvelope (result).ToJson (resultJsonResolver) : ToPlainText (result);
         var writeToOutput = result.Status is CommandStatus.Ok or CommandStatus.NoResult;
         TextWriter writer = result.Status == CommandStatus.Error && !jsonOutput ? stderr : stdout;
 

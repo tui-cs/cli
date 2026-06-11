@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Xunit;
 
 namespace Terminal.Gui.Cli.Tests;
@@ -15,6 +16,20 @@ public sealed class OutputTests
         Assert.Equal ("ok", document.RootElement.GetProperty ("status").GetString ());
         Assert.Equal ("value", document.RootElement.GetProperty ("value").GetString ());
         Assert.False (document.RootElement.TryGetProperty ("code", out _));
+    }
+
+    [Fact]
+    public void JsonEnvelope_ToJson_WithResolver_EmbedsConsumerTypeAsObject ()
+    {
+        var json = JsonEnvelope.Ok (new SampleResult ("Alice", 30, null))
+            .ToJson (SampleJsonContext.Default);
+
+        using JsonDocument document = JsonDocument.Parse (json);
+        JsonElement value = document.RootElement.GetProperty ("value");
+        Assert.Equal (JsonValueKind.Object, value.ValueKind);
+        Assert.Equal ("Alice", value.GetProperty ("name").GetString ());
+        Assert.Equal (30, value.GetProperty ("age").GetInt32 ());
+        Assert.False (value.TryGetProperty ("note", out _));
     }
 
     [Fact]
@@ -39,3 +54,11 @@ public sealed class OutputTests
             TerminalEscapeSanitizer.SanitizeRenderedOutput ("\u001b[1mstrong\u001b[0m"));
     }
 }
+
+internal sealed record SampleResult (string Name, int Age, string? Note);
+
+[JsonSourceGenerationOptions (
+    PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
+    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
+[JsonSerializable (typeof (SampleResult))]
+internal sealed partial class SampleJsonContext : JsonSerializerContext;

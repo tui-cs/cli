@@ -18,7 +18,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
 
-    <TerminalGuiVersion Condition="'$(TerminalGuiVersion)' == ''">2.4.1-develop.11</TerminalGuiVersion>
+    <TerminalGuiVersion Condition="'$(TerminalGuiVersion)' == ''">2.4.3</TerminalGuiVersion>
 
     <!-- SourceLink & symbol packages -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>

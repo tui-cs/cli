@@ -1,5 +1,6 @@
 using System.Reflection;
 using Terminal.Gui.App;
+using Terminal.Gui.Drivers;
 
 namespace Terminal.Gui.Cli;
 
@@ -179,6 +180,30 @@ public sealed class CliHost
             null,
             null,
             null);
+    }
+
+    /// <summary>
+    ///     Creates, initializes, and disposes a headless ANSI-driver Terminal.Gui application around
+    ///     <paramref name="render" />. Centralizes the Terminal.Gui lifecycle here (constitution C1) so
+    ///     helpers such as <see cref="MarkdownRenderer" /> never call lifecycle entrypoints directly.
+    /// </summary>
+    internal static void RunHeadlessRender (int width, int height, Action<IApplication> render)
+    {
+        var previousDriverIO = Environment.GetEnvironmentVariable ("DisableRealDriverIO");
+        Environment.SetEnvironmentVariable ("DisableRealDriverIO", "1");
+        IApplication app = Application.Create ();
+
+        try
+        {
+            app.Init (DriverRegistry.Names.ANSI);
+            app.Driver?.SetScreenSize (width, height);
+            render (app);
+        }
+        finally
+        {
+            app.Dispose ();
+            Environment.SetEnvironmentVariable ("DisableRealDriverIO", previousDriverIO);
+        }
     }
 
     private async Task<CommandResult> RunWithTerminalGuiAsync (ICliCommand command, CommandRunOptions runOptions,

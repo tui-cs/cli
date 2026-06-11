@@ -5,10 +5,85 @@ namespace Terminal.Gui.Cli.IntegrationTests;
 
 /// <summary>
 ///     Verifies that CliHost.RunWithTerminalGuiAsync sets IApplication.AppModel
-///     correctly based on CommandKind and the --fullscreen option.
+///     correctly based on CommandKind and the --fullscreen option, initializes the
+///     application before dispatching (issue #18), and restores the process-wide
+///     Application.AppModel after dispatch (issue #26).
 /// </summary>
 public sealed class AppModelDispatchTests
 {
+    [Fact]
+    public async Task InputCommand_Inline_ReceivesInitializedApplication ()
+    {
+        // ICliCommand.RunAsync contract: commands run after the host has initialized
+        // Terminal.Gui, including on the inline input path (issue #18).
+        bool? initialized = null;
+        SpyInputCommand spy = new (app => initialized = app.Initialized);
+
+        CliHost host = new ();
+        host.Registry.Register (spy);
+        using StringWriter stdout = new ();
+        using StringWriter stderr = new ();
+
+        await host.RunAsync (["spy-input"], TestContext.Current.CancellationToken, stdout, stderr);
+
+        Assert.True (initialized);
+    }
+
+    [Fact]
+    public async Task InputCommand_Inline_RestoresAppModelAfterDispatch ()
+    {
+        // Application.AppModel is process-wide; leaving it set to Inline after dispatch
+        // makes later Terminal.Gui sessions in the same process inherit it (issue #26).
+        AppModel before = Application.AppModel;
+
+        try
+        {
+            Application.AppModel = AppModel.FullScreen;
+            SpyInputCommand spy = new (_ => { });
+
+            CliHost host = new ();
+            host.Registry.Register (spy);
+            using StringWriter stdout = new ();
+            using StringWriter stderr = new ();
+
+            await host.RunAsync (["spy-input"], TestContext.Current.CancellationToken, stdout, stderr);
+
+            Assert.Equal (AppModel.FullScreen, Application.AppModel);
+        }
+        finally
+        {
+            Application.AppModel = before;
+        }
+    }
+
+    [Fact]
+    public async Task InputCommand_ThrowsCancellation_RestoresAppModel ()
+    {
+        // The restore must also happen when the command throws (issue #26).
+        AppModel before = Application.AppModel;
+
+        try
+        {
+            Application.AppModel = AppModel.FullScreen;
+            SpyInputCommand spy = new (_ => throw new OperationCanceledException ());
+
+            CliHost host = new ();
+            host.Registry.Register (spy);
+            using StringWriter stdout = new ();
+            using StringWriter stderr = new ();
+
+            var exitCode = await host.RunAsync (["spy-input"], TestContext.Current.CancellationToken, stdout,
+                stderr);
+
+            Assert.Equal (ExitCodes.Cancelled, exitCode);
+            Assert.Equal (AppModel.FullScreen, Application.AppModel);
+        }
+        finally
+        {
+            Application.AppModel = before;
+        }
+    }
+
     [Fact]
     public async Task InputCommand_WithoutFullscreen_SetsInlineAppModel ()
     {

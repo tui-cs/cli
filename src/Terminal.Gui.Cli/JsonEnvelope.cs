@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Terminal.Gui.Cli;
 
@@ -48,7 +49,27 @@ public sealed class JsonEnvelope
     /// <summary>Serializes using the source-generated JSON context.</summary>
     public string ToJson ()
     {
-        return JsonSerializer.Serialize (this, CliJsonContext.Default.JsonEnvelope);
+        return ToJson (null);
+    }
+
+    /// <summary>
+    ///     Serializes the envelope using the source-generated context. When <paramref name="resultResolver" /> is
+    ///     provided it is combined with the built-in context so consumer-defined <see cref="Value" /> types resolve
+    ///     without reflection.
+    /// </summary>
+    public string ToJson (IJsonTypeInfoResolver? resultResolver)
+    {
+        if (resultResolver is null)
+        {
+            return JsonSerializer.Serialize (this, CliJsonContext.Default.JsonEnvelope);
+        }
+
+        JsonSerializerOptions options = new (CliJsonContext.Default.Options)
+        {
+            TypeInfoResolver = JsonTypeInfoResolver.Combine (CliJsonContext.Default, resultResolver)
+        };
+
+        return JsonSerializer.Serialize (this, options.GetTypeInfo (typeof (JsonEnvelope)));
     }
 }
 

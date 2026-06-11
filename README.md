@@ -103,7 +103,7 @@ dotnet run --project tests/Terminal.Gui.Cli.IntegrationTests
 dotnet run --project tests/Terminal.Gui.Cli.SmokeTests
 
 # Try the example app
-dotnet run --project examples/Terminal.Gui.Cli.ExampleApp -- greet --initial "World" --json
+dotnet run --project examples/greet -- greet --initial "World" --json
 ```
 
 ## Status

@@ -23,6 +23,11 @@ public static class InputCommandRunner
         ArgumentNullException.ThrowIfNull (options);
         ArgumentNullException.ThrowIfNull (resultMapper);
 
+        if (!app.Initialized)
+        {
+            app.Init ();
+        }
+
         wrapper.Title = options.Title ?? defaultTitle;
         await app.RunAsync (wrapper, cancellationToken);
         return resultMapper (wrapper.Result);

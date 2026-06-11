@@ -1,6 +1,6 @@
 using Terminal.Gui.App;
 
-namespace Terminal.Gui.Cli.ExampleApp;
+namespace Terminal.Gui.Cli.Greet;
 
 /// <summary>An input command that prompts for a name and returns a greeting.</summary>
 public sealed class GreetCommand : ICliCommand<string>
@@ -27,13 +27,19 @@ public sealed class GreetCommand : ICliCommand<string>
     ];
 
     /// <inheritdoc />
+    public bool AcceptsPositionalArgs => true;
+
+    /// <inheritdoc />
     public Task<CommandResult<string>> RunAsync (
         IApplication app,
         string? initial,
         CommandRunOptions options,
         CancellationToken cancellationToken)
     {
-        var name = initial ?? "World";
+        var name = options.Arguments.Count > 0
+            ? string.Join (" ", options.Arguments)
+            : initial ?? "World";
+
         var formal = options.CommandOptions.TryGetValue ("formal", out var formalValue)
                      && formalValue.Equals ("true", StringComparison.OrdinalIgnoreCase);
 

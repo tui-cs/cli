@@ -38,6 +38,11 @@ public sealed class CliHost
 
         if (!initialParse.Success)
         {
+            if (_options.DefaultCommand is not null)
+            {
+                return await RunWithDefaultCommandAsync (args, cancellationToken, stdout, stderr);
+            }
+
             stderr.WriteLine (initialParse.Error);
             return ExitCodes.UsageError;
         }
@@ -51,10 +56,49 @@ public sealed class CliHost
         if (initialParse.Alias is null || !Registry.TryResolve (initialParse.Alias, out ICliCommand? command) ||
             command is null)
         {
+            if (_options.DefaultCommand is not null)
+            {
+                return await RunWithDefaultCommandAsync (args, cancellationToken, stdout, stderr);
+            }
+
             stderr.WriteLine ($"Unknown command '{initialParse.Alias}'.");
             return ExitCodes.UsageError;
         }
 
+        return await DispatchCommandAsync (args, command, cancellationToken, stdout, stderr);
+    }
+
+    private async Task<int> RunWithDefaultCommandAsync (
+        string[] args,
+        CancellationToken cancellationToken,
+        TextWriter stdout,
+        TextWriter stderr)
+    {
+        if (!Registry.TryResolve (_options.DefaultCommand!, out ICliCommand? defaultCmd) || defaultCmd is null)
+        {
+            stderr.WriteLine ($"Default command '{_options.DefaultCommand}' is not registered.");
+            return ExitCodes.UsageError;
+        }
+
+        string[] adjusted = [_options.DefaultCommand!, .. args];
+        ArgParser.ParseResult parse = _parser.Parse (adjusted, defaultCmd);
+
+        if (!parse.Success || parse.Options is null)
+        {
+            stderr.WriteLine (parse.Error);
+            return ExitCodes.UsageError;
+        }
+
+        return await ExecuteCommandAsync (defaultCmd, parse.Options, cancellationToken, stdout, stderr);
+    }
+
+    private async Task<int> DispatchCommandAsync (
+        string[] args,
+        ICliCommand command,
+        CancellationToken cancellationToken,
+        TextWriter stdout,
+        TextWriter stderr)
+    {
         ArgParser.ParseResult parse = _parser.Parse (args, command);
 
         if (!parse.Success || parse.Options is null)
@@ -63,8 +107,16 @@ public sealed class CliHost
             return ExitCodes.UsageError;
         }
 
-        CommandRunOptions runOptions = parse.Options;
+        return await ExecuteCommandAsync (command, parse.Options, cancellationToken, stdout, stderr);
+    }
 
+    private async Task<int> ExecuteCommandAsync (
+        ICliCommand command,
+        CommandRunOptions runOptions,
+        CancellationToken cancellationToken,
+        TextWriter stdout,
+        TextWriter stderr)
+    {
         if (runOptions.Initial is not null && !command.TryValidateInitial (runOptions.Initial, runOptions))
         {
             stderr.WriteLine ("Invalid --initial value.");
@@ -132,7 +184,16 @@ public sealed class CliHost
     private async Task<CommandResult> RunWithTerminalGuiAsync (ICliCommand command, CommandRunOptions runOptions,
         CancellationToken cancellationToken)
     {
-        using IApplication app = Application.Create ().Init ();
+        var useInline = command.Kind == CommandKind.Input && !runOptions.Fullscreen;
+
+        using IApplication app = Application.Create ();
+        app.AppModel = useInline ? AppModel.Inline : AppModel.FullScreen;
+
+        if (!useInline)
+        {
+            app.Init ();
+        }
+
         return await command.RunAsync (app, runOptions.Initial, runOptions, cancellationToken);
     }
 

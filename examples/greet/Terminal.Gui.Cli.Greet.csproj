@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Terminal.Gui.Cli.Greet</RootNamespace>
+    <AssemblyName>greet</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Terminal.Gui.Cli\Terminal.Gui.Cli.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\agent-guide.md" LogicalName="Terminal.Gui.Cli.Greet.agent-guide.md" />
+    <EmbeddedResource Include="Resources\Help\help.md" LogicalName="help.md" />
+    <EmbeddedResource Include="Resources\Help\greet.md" LogicalName="greet.md" />
+    <EmbeddedResource Include="Resources\Help\farewell.md" LogicalName="farewell.md" />
+    <EmbeddedResource Include="Resources\Help\info.md" LogicalName="info.md" />
+  </ItemGroup>
+
+</Project>

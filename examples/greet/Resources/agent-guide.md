@@ -1,6 +1,6 @@
-# Example App Agent Guide
+# Greet App Agent Guide
 
-This document describes how AI agents should interact with `example-app`.
+This document describes how AI agents should interact with `greet`.
 
 ## Available Commands
 
@@ -17,9 +17,9 @@ An input command that prompts the user for their name and returns a greeting.
 **Usage:**
 
 ```bash
-example-app greet --initial "World"
-example-app greet --initial "World" --json
-example-app greet --initial "World" --formal
+greet greet --initial "World"
+greet greet --initial "World" --json
+greet greet --initial "World" --formal
 ```
 
 ### info
@@ -34,8 +34,8 @@ A viewer command that displays application information.
 **Usage:**
 
 ```bash
-example-app info --cat
-example-app info --cat --json
+greet info --cat
+greet info --cat --json
 ```
 
 ## Framework Options

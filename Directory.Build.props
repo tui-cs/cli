@@ -19,7 +19,17 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
 
     <TerminalGuiVersion Condition="'$(TerminalGuiVersion)' == ''">2.4.1-develop.11</TerminalGuiVersion>
+
+    <!-- SourceLink & symbol packages -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.*" PrivateAssets="All" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="" />

@@ -1,10 +1,10 @@
 using System.Runtime.CompilerServices;
+using Xunit;
+
+[assembly: CollectionBehavior (DisableTestParallelization = true)]
 
 namespace Terminal.Gui.Cli.IntegrationTests;
 
-/// <summary>
-///     Disables real driver I/O so tests never interact with the terminal or launch processes.
-/// </summary>
 internal static class TestSetup
 {
     [ModuleInitializer]

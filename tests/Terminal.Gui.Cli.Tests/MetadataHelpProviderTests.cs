@@ -6,54 +6,59 @@ namespace Terminal.Gui.Cli.Tests;
 public sealed class MetadataHelpProviderTests
 {
     [Fact]
-    public void GetRootHelp_GeneratesMarkdownWithHeadings ()
+    public void GetRootHelp_ProducesMarkdown ()
     {
-        CommandRegistry registry = new ();
-        registry.Register (new StubCommand ("pick", "Pick something."));
         MetadataHelpProvider provider = new ();
+        CommandRegistry registry = new ();
+        registry.Register (new StubCommand ("demo", "A demo command."));
 
         var result = provider.GetRootHelp (registry);
 
         Assert.NotNull (result);
         Assert.Contains ("## Commands", result);
-        Assert.Contains ("## Framework options", result);
-        Assert.Contains ("- `pick`", result);
-        Assert.Contains ("`--help`", result);
+        Assert.Contains ("| `demo` | A demo command. |", result);
+        Assert.Contains ("## Framework Options", result);
+        Assert.Contains ("| `--help`, `-h` | Show help |", result);
     }
 
     [Fact]
-    public void GetRootHelp_ListsAllRegisteredCommands ()
+    public void GetCommandHelp_ProducesMarkdown ()
     {
-        CommandRegistry registry = new ();
-        registry.Register (new StubCommand ("alpha", "Alpha command."));
-        registry.Register (new StubCommand ("beta", "Beta command."));
         MetadataHelpProvider provider = new ();
+        StubCommand command = new ("test", "Test command.");
 
-        var result = provider.GetRootHelp (registry);
+        var result = provider.GetCommandHelp (command);
 
         Assert.NotNull (result);
-        Assert.Contains ("- `alpha` — Alpha command.", result);
-        Assert.Contains ("- `beta` — Beta command.", result);
+        Assert.Contains ("# test", result);
+        Assert.Contains ("Test command.", result);
     }
 
-    private sealed class StubCommand (string alias, string description) : ICliCommand
+    private sealed class StubCommand : ICliCommand
     {
-        public string PrimaryAlias { get; } = alias;
+        public StubCommand (string alias, string description)
+        {
+            PrimaryAlias = alias;
+            Aliases = [alias];
+            Description = description;
+        }
 
-        public IReadOnlyList<string> Aliases => [PrimaryAlias];
+        public string PrimaryAlias { get; }
 
-        public string Description => description;
+        public IReadOnlyList<string> Aliases { get; }
+
+        public string Description { get; }
 
         public CommandKind Kind => CommandKind.Input;
 
-        public Type ResultType => typeof (string);
+        public Type ResultType => typeof (void);
 
         public IReadOnlyList<CommandOptionDescriptor> Options { get; } = [];
 
-        public Task<CommandResult> RunAsync (IApplication app, string? initial, CommandRunOptions options,
-            CancellationToken cancellationToken)
+        public Task<CommandResult> RunAsync (IApplication app, string? initial,
+            CommandRunOptions options, CancellationToken cancellationToken)
         {
-            return Task.FromResult (new CommandResult (CommandStatus.Ok, "ok", null, null));
+            throw new NotImplementedException ();
         }
     }
 }

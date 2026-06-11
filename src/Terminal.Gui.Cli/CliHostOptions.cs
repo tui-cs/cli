@@ -31,6 +31,12 @@ public sealed class CliHostOptions
     /// <summary>Consumer-defined global options parsed into <see cref="CommandRunOptions.Extensions" />.</summary>
     public List<GlobalOptionDescriptor> GlobalOptions { get; } = [];
 
+    /// <summary>
+    ///     Alias of the default command to invoke when args don't match any registered command.
+    ///     When set, bare positional args or unrecognized options are retried as args to this command.
+    /// </summary>
+    public string? DefaultCommand { get; set; }
+
     internal IReadOnlyDictionary<string, ICliCommand> BuiltInReplacements => _builtInReplacements;
 
     /// <summary>Replaces a library built-in command before it is registered.</summary>

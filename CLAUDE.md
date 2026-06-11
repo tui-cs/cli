@@ -21,7 +21,7 @@ If guidance conflicts, follow `specs/constitution.md`.
 - `tests/Terminal.Gui.Cli.Tests` — unit tests
 - `tests/Terminal.Gui.Cli.IntegrationTests` — integration tests
 - `tests/Terminal.Gui.Cli.SmokeTests` — smoke tests
-- `examples/Terminal.Gui.Cli.ExampleApp` — sample console app
+- `examples/greet` — sample console app
 
 ## Build and test
 

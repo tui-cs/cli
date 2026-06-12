@@ -38,8 +38,13 @@ resolve to a registered command. When set, `CliHost` routes to that command in t
 - The leading token is not a recognized command alias.
 
 In each case the host re-parses `[DefaultCommand, ..args]` against the resolved default
-command, so bare positional args and unrecognized options are retried as args to it. If
-`DefaultCommand` names an alias that is not registered, the host emits
+command, so bare positional args and unrecognized options are retried as args to it. The
+reparse uses `ArgParser.Parse(args, command, unknownOptionsAsArguments: true)`: dash-prefixed
+tokens that match no framework, global, or default-command option pass through verbatim as
+positional arguments (e.g. `app --literal` and `app Alice --suffix` reach the default command
+as positionals), while recognized options still parse as options. If the default command does
+not accept positional args, leftover tokens still produce the usual positional-args usage
+error. If `DefaultCommand` names an alias that is not registered, the host emits
 `Default command '<name>' is not registered.` and returns a usage error. When
 `DefaultCommand` is null, the original parse/usage-error behavior is preserved.
 

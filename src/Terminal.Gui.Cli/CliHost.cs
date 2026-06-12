@@ -90,7 +90,11 @@ public sealed class CliHost
         }
 
         string[] adjusted = [_options.DefaultCommand!, .. args];
-        ArgParser.ParseResult parse = _parser.Parse (adjusted, defaultCmd);
+
+        // The fallback fires precisely because the original tokens didn't resolve to a known
+        // command/options, so unknown dash-prefixed tokens must pass through verbatim as
+        // positional arguments rather than failing the reparse (issue #30).
+        ArgParser.ParseResult parse = _parser.Parse (adjusted, defaultCmd, true);
 
         if (!parse.Success || parse.Options is null)
         {

@@ -39,6 +39,52 @@ public sealed class ArgParserTests
     }
 
     [Fact]
+    public void Parse_UnknownDashToken_FailsByDefault ()
+    {
+        ArgParser parser = new ([]);
+
+        ArgParser.ParseResult result =
+            parser.Parse (["pick", "--name", "value", "--literal"], new TestCommand (true));
+
+        Assert.False (result.Success);
+        Assert.Contains ("--literal", result.Error);
+    }
+
+    [Fact]
+    public void Parse_UnknownOptionsAsArguments_TreatsUnknownDashTokensAsPositionals ()
+    {
+        ArgParser parser = new ([]);
+
+        ArgParser.ParseResult result = parser.Parse (
+            ["pick", "--literal", "Alice", "--name", "value", "--json"],
+            new TestCommand (true),
+            true);
+
+        Assert.True (result.Success, result.Error);
+        Assert.NotNull (result.Options);
+
+        // Unknown dash tokens pass through verbatim as positionals; recognized
+        // command and framework options still parse normally.
+        Assert.Equal (["--literal", "Alice"], result.Options.Arguments);
+        Assert.Equal ("value", result.Options.CommandOptions["name"]);
+        Assert.True (result.Options.JsonOutput);
+    }
+
+    [Fact]
+    public void Parse_UnknownOptionsAsArguments_StillRejectedWhenCommandForbidsPositionals ()
+    {
+        ArgParser parser = new ([]);
+
+        ArgParser.ParseResult result = parser.Parse (
+            ["pick", "--name", "value", "--literal"],
+            new TestCommand (false),
+            true);
+
+        Assert.False (result.Success);
+        Assert.Contains ("positional", result.Error);
+    }
+
+    [Fact]
     public void Parse_RejectsMissingRequiredCommandOption ()
     {
         ArgParser parser = new ([]);

@@ -29,7 +29,22 @@ public sealed class ArgParser
     }
 
     /// <summary>Parses command-line arguments, optionally validating against a resolved command.</summary>
+    /// <param name="args">The raw command-line arguments.</param>
+    /// <param name="command">The resolved command to validate options against, when known.</param>
     public ParseResult Parse (string[] args, ICliCommand? command = null)
+    {
+        return Parse (args, command, false);
+    }
+
+    /// <summary>Parses command-line arguments, optionally validating against a resolved command.</summary>
+    /// <param name="args">The raw command-line arguments.</param>
+    /// <param name="command">The resolved command to validate options against, when known.</param>
+    /// <param name="unknownOptionsAsArguments">
+    ///     When true, dash-prefixed tokens that match no framework, global, or command option are passed
+    ///     through verbatim as positional arguments instead of failing the parse. Used by the
+    ///     default-command fallback so original tokens reach the default command (issue #30).
+    /// </param>
+    public ParseResult Parse (string[] args, ICliCommand? command, bool unknownOptionsAsArguments)
     {
         ArgumentNullException.ThrowIfNull (args);
 
@@ -127,6 +142,13 @@ public sealed class ArgParser
                     index++;
                 }
 
+                continue;
+            }
+
+            if (unknownOptionsAsArguments)
+            {
+                arguments.Add (token);
+                index++;
                 continue;
             }
 

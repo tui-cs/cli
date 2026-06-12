@@ -95,6 +95,54 @@ public sealed class GreetExampleTests
     }
 
     [Fact]
+    public async Task DefaultCommand_DashPrefixedToken_PassesThroughAsPositionalArg ()
+    {
+        CliHost host = CreateGreetHost ();
+        using StringWriter stdout = new ();
+        using StringWriter stderr = new ();
+
+        // "--literal" is not a recognized option anywhere; the default-command fallback
+        // must pass it through verbatim as a positional argument (issue #30).
+        var exitCode = await host.RunAsync (["--literal"], TestContext.Current.CancellationToken, stdout, stderr);
+
+        Assert.Equal (ExitCodes.Ok, exitCode);
+        Assert.Contains ("Hello, --literal!", stdout.ToString ());
+        Assert.Equal (string.Empty, stderr.ToString ());
+    }
+
+    [Fact]
+    public async Task DefaultCommand_PositionalThenUnknownOption_PassesBothThroughAsArgs ()
+    {
+        CliHost host = CreateGreetHost ();
+        using StringWriter stdout = new ();
+        using StringWriter stderr = new ();
+
+        var exitCode = await host.RunAsync (["Alice", "--suffix"], TestContext.Current.CancellationToken, stdout,
+            stderr);
+
+        Assert.Equal (ExitCodes.Ok, exitCode);
+        Assert.Contains ("Hello, Alice --suffix!", stdout.ToString ());
+        Assert.Equal (string.Empty, stderr.ToString ());
+    }
+
+    [Fact]
+    public async Task DefaultCommand_RecognizedOptionInFallback_StillParsesAsOption ()
+    {
+        CliHost host = CreateGreetHost ();
+        using StringWriter stdout = new ();
+        using StringWriter stderr = new ();
+
+        // "--formal" is a declared option of the default command; the fallback must
+        // still parse it as an option, not a positional argument.
+        var exitCode = await host.RunAsync (["Alice", "--formal"], TestContext.Current.CancellationToken, stdout,
+            stderr);
+
+        Assert.Equal (ExitCodes.Ok, exitCode);
+        Assert.Contains ("Good day, Alice.", stdout.ToString ());
+        Assert.Equal (string.Empty, stderr.ToString ());
+    }
+
+    [Fact]
     public async Task HelpCat_RendersAnsiForRootHelp ()
     {
         CliHost host = CreateGreetHost ();

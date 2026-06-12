@@ -126,6 +126,11 @@ public sealed class CliHost
         TextWriter stdout,
         TextWriter stderr)
     {
+        // Capture whether each writer is the real console before Terminal.Gui runs. Changing
+        // Console.OutputEncoding replaces Console.Out/Error, so this comparison is only valid now.
+        var stdoutIsConsole = ReferenceEquals (stdout, Console.Out);
+        var stderrIsConsole = ReferenceEquals (stderr, Console.Error);
+
         if (runOptions.Initial is not null && !command.TryValidateInitial (runOptions.Initial, runOptions))
         {
             stderr.WriteLine ("Invalid --initial value.");
@@ -184,19 +189,26 @@ public sealed class CliHost
 
         // Terminal.Gui may change Console.OutputEncoding during its session (e.g. to UTF-8 for
         // rendering). After shutdown, the encoding might be restored to OEM or left as UTF-8.
-        // Either way, the stdout/stderr references captured before TG ran are now stale
-        // (Console.Out is replaced whenever OutputEncoding changes). Ensure UTF-8 and use
+        // Either way, console writer references captured before TG ran are now stale
+        // (Console.Out is replaced whenever OutputEncoding changes). Ensure UTF-8 and re-acquire
         // the current Console.Out/Error so Unicode content (box-drawing, etc.) renders correctly.
-        // Only do this when writing to the real console (not custom writers passed by tests).
-        if (stdout is not StringWriter)
+        // Caller-supplied writers are left untouched — only real console writers go stale.
+        if (stdoutIsConsole || stderrIsConsole)
         {
             if (Console.OutputEncoding.CodePage != Encoding.UTF8.CodePage)
             {
                 Console.OutputEncoding = Encoding.UTF8;
             }
 
-            stdout = Console.Out;
-            stderr = Console.Error;
+            if (stdoutIsConsole)
+            {
+                stdout = Console.Out;
+            }
+
+            if (stderrIsConsole)
+            {
+                stderr = Console.Error;
+            }
         }
 
         if (!ResultWriter.Write (result, runOptions.JsonOutput, stdout, stderr, runOptions.OutputPath,
@@ -245,12 +257,24 @@ public sealed class CliHost
         CancellationToken cancellationToken)
     {
         var useInline = command.Kind == CommandKind.Input && !runOptions.Fullscreen;
+
+        // Application.AppModel is process-wide state; restore it after dispatch so later
+        // Terminal.Gui sessions in the same process (embedding, headless rendering) do not
+        // inherit this command's app model.
+        AppModel previousAppModel = Application.AppModel;
         Application.AppModel = useInline ? AppModel.Inline : AppModel.FullScreen;
 
-        using IApplication app = Application.Create ();
-        app.Init ();
+        try
+        {
+            using IApplication app = Application.Create ();
+            app.Init ();
 
-        return await command.RunAsync (app, runOptions.Initial, runOptions, cancellationToken);
+            return await command.RunAsync (app, runOptions.Initial, runOptions, cancellationToken);
+        }
+        finally
+        {
+            Application.AppModel = previousAppModel;
+        }
     }
 
     private void WriteRootFlag (ArgParser.RootFlag rootFlag, TextWriter stdout)

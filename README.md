@@ -3,7 +3,7 @@
 [![NuGet](https://img.shields.io/nuget/vpre/Terminal.Gui.Cli)](https://www.nuget.org/packages/Terminal.Gui.Cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-> A .NET library that turns [Terminal.Gui](https://github.com/gui-cs/Terminal.Gui) apps into scriptable CLI tools — with typed JSON output, POSIX exit codes, and built-in AI-agent discoverability.
+> A .NET library that turns [Terminal.Gui](https://github.com/tui-cs/Terminal.Gui) apps into scriptable CLI tools — with typed JSON output, POSIX exit codes, and built-in AI-agent discoverability.
 
 ![Terminal.Gui.Cli in action](docs/images/hero.gif)
 

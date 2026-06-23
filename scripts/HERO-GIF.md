@@ -4,7 +4,7 @@ Produces `docs/images/hero.gif` — an animated GIF demonstrating the example ap
 
 ## Prerequisites
 
-- [tuirec](https://github.com/gui-cs/tuirec) v0.3.4+ on PATH (`go install github.com/gui-cs/tuirec/cmd/tuirec@latest`)
+- [tuirec](https://github.com/tui-cs/tuirec) v0.3.4+ on PATH (`go install github.com/tui-cs/tuirec/cmd/tuirec@latest`)
 - .NET 10 SDK (for building the example app)
 - PowerShell 7+ (`pwsh`) on PATH
 - `agg` is auto-downloaded by tuirec on first use

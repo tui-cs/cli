@@ -12,7 +12,7 @@
     <Company>tui-cs</Company>
     <Copyright>Copyright (c) tui-cs and contributors</Copyright>
 
-    <Version>0.2.1-develop</Version>
+    <Version>0.3.1-develop</Version>
     <PackageProjectUrl>https://github.com/tui-cs/cli</PackageProjectUrl>
     <RepositoryUrl>https://github.com/tui-cs/cli</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

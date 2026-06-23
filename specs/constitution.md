@@ -1,8 +1,8 @@
-# gui-cs/cli Constitution
+# tui-cs/cli Constitution
 
 **Version**: 1.1 | **Ratified**: 2026-05-23 | **Last Amended**: 2026-05-23
 
-This constitution governs all contributions to `gui-cs/cli`. It is the highest-authority engineering document in this repository.
+This constitution governs all contributions to `tui-cs/cli`. It is the highest-authority engineering document in this repository.
 
 ## I. Purpose & Scope
 

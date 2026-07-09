@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Terminal.Gui.Cli\Terminal.Gui.Cli.csproj" />
+    <ProjectReference Include="..\..\examples\survey\Terminal.Gui.Cli.Survey.csproj" />
   </ItemGroup>
 
   <ItemGroup>

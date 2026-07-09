@@ -17,6 +17,7 @@
     <File Path="Directory.Build.targets" />
   </Folder>
   <Project Path="examples/greet/Terminal.Gui.Cli.Greet.csproj" />
+  <Project Path="examples/survey/Terminal.Gui.Cli.Survey.csproj" />
   <Project Path="src/Terminal.Gui.Cli/Terminal.Gui.Cli.csproj" />
   <Project Path="tests/Terminal.Gui.Cli.IntegrationTests/Terminal.Gui.Cli.IntegrationTests.csproj" />
   <Project Path="tests/Terminal.Gui.Cli.SmokeTests/Terminal.Gui.Cli.SmokeTests.csproj" />

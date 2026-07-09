@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Terminal.Gui.Cli.Survey</RootNamespace>
+    <AssemblyName>survey</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Terminal.Gui.Cli\Terminal.Gui.Cli.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Terminal.Gui.Interop.Spectre" Version="$(TerminalGuiVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\agent-guide.md" LogicalName="Terminal.Gui.Cli.Survey.agent-guide.md" />
+    <EmbeddedResource Include="Resources\Help\help.md" LogicalName="help.md" />
+    <EmbeddedResource Include="Resources\Help\survey.md" LogicalName="survey.md" />
+  </ItemGroup>
+
+</Project>

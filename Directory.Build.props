@@ -18,8 +18,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
 
-    <!-- TEMP: public 2.5.0-develop.55 (TG #5416 / #5630 workstream 4). Swap to stable 2.5.x before merge. -->
-    <TerminalGuiVersion Condition="'$(TerminalGuiVersion)' == ''">2.5.0-develop.55</TerminalGuiVersion>
+    <TerminalGuiVersion Condition="'$(TerminalGuiVersion)' == ''">2.5.0-beta.1</TerminalGuiVersion>
 
     <!-- SourceLink & symbol packages -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>

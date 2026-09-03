@@ -10,7 +10,3 @@ packages/
 publish/
 *.nupkg
 launchSettings.json
-
-# TEMP: vendored Terminal.Gui 2.5.0 preview feed (see nuget.config); remove once 2.5.x is on nuget.org
-!local_packages/*.nupkg
-!local_packages/*.snupkg
